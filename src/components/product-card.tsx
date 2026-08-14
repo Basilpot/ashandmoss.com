@@ -26,7 +26,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="mt-4">
         <p className="text-[11px] tracking-[0.16em] text-muted-foreground uppercase">
-          {String(product.attributes.Wood ?? "")}
+          {String(product.attributes["Wood"] ?? "")}
         </p>
         <h3 className="mt-1 text-base font-medium">{product.name}</h3>
         <p className="mt-1 text-sm">
