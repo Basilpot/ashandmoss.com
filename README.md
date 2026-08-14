@@ -1,14 +1,27 @@
-# Welcome to your Lovable project
+# Ash & Moss Furnishings
+
+Create a storefront for ecommerce store, I've attached the reference screnshots for design, use Ash and Moss for name, and Livvic for fonts.  and for color tokens use--dust-grey: #dad7cdff;
+
+--dry-sage: #a3b18aff;
+
+--fern: #588157ff;
+
+--hunter-green: #3a5a40ff;
+
+--pine-teal: #344e41ff;
+
+
+Explore page filters are dynamic based on what attributes they have.  And you're going to design a storefront to sell custom furnitures. Images are for design reference only.
 
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/4c9adf8b-6bf7-4453-9678-400451852276).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +33,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
