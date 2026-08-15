@@ -23,7 +23,8 @@ export function SiteHeader({
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur">
+    <>
+      <header className="sticky top-0 z-40 bg-background/90 backdrop-blur">
       {/* Layer 1 — ribbon */}
       <div className="bg-pine-teal text-primary-foreground">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-2 text-[10px] tracking-[0.16em] uppercase sm:text-[11px]">
@@ -140,8 +141,11 @@ export function SiteHeader({
           </div>
         )}
       </nav>
+      </header>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — rendered outside <header> so `fixed inset-0` stays
+          viewport-relative; the header's backdrop-blur would otherwise become
+          the containing block for fixed descendants and clip the drawer. */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
@@ -224,7 +228,7 @@ export function SiteHeader({
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }
 
