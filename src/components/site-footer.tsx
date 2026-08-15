@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router";
+import Link from "next/link";
+import type { MenuItem } from "@/lib/types";
 
-export function SiteFooter() {
+export function SiteFooter({ footer }: { footer: MenuItem[] }) {
   return (
     <footer className="mt-24 bg-pine-teal text-primary-foreground">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:grid-cols-2 lg:grid-cols-4">
@@ -9,43 +10,45 @@ export function SiteFooter() {
           <p className="mt-3 max-w-xs text-sm text-primary-foreground/70">
             A small workshop making furniture to measure, one commission at a time.
           </p>
+          <div className="mt-6">
+            <p className="eyebrow text-primary-foreground/60">Studio</p>
+            <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
+              <li>
+                <Link href="/craft">The craft</Link>
+              </li>
+              <li>
+                <Link href="/contact">Commission a piece</Link>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div>
-          <p className="eyebrow text-primary-foreground/60">Shop</p>
-          <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
-            <li>
-              <Link to="/explore">All pieces</Link>
-            </li>
-            <li>
-              <Link to="/explore">Seating</Link>
-            </li>
-            <li>
-              <Link to="/explore">Tables</Link>
-            </li>
-            <li>
-              <Link to="/explore">Storage</Link>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <p className="eyebrow text-primary-foreground/60">Studio</p>
-          <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
-            <li>
-              <Link to="/craft">The craft</Link>
-            </li>
-            <li>
-              <Link to="/contact">Commission a piece</Link>
-            </li>
-            <li>Care &amp; repair</li>
-            <li>Trade program</li>
-          </ul>
-        </div>
+
+        {footer.map((col) => (
+          <div key={col.id}>
+            <p className="eyebrow text-primary-foreground/60">{col.label}</p>
+            <ul className="mt-4 space-y-2 text-sm text-primary-foreground/80">
+              {col.children.map((child) => (
+                <li key={child.id}>
+                  <Link
+                    href={child.url}
+                    className="transition-opacity hover:opacity-80"
+                  >
+                    {child.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+
         <div>
           <p className="eyebrow text-primary-foreground/60">Workshop</p>
           <p className="mt-4 text-sm text-primary-foreground/80">
-            118 Mill Road
+            08 New Rd
             <br />
-            Bend, Oregon
+            Pokhara, Nepal
+            <br />
+            +977 9841328947
             <br />
             hello@ashandmoss.com
           </p>
