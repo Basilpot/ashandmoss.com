@@ -15,12 +15,20 @@ const livvic = Livvic({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ashandmoss.com"),
   title: {
     default: "Ash & Moss — Custom Furniture Made to Measure",
     template: "%s — Ash & Moss",
   },
   description:
     "Hand-built oak, ash and walnut furniture made to your measurements. Seating, tables, storage and beds from a small Oregon workshop.",
+  robots: { index: true, follow: true },
+  openGraph: {
+    siteName: "Ash & Moss",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default async function RootLayout({

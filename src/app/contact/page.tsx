@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   title: "Commission a Piece",
   description:
     "Tell us about the room and we'll draw a custom furniture piece to fit it. Commissions open each season.",
+  alternates: { canonical: "/contact" },
+  openGraph: { title: "Commission a Piece", type: "website" },
 };
 
 export default function Contact() {

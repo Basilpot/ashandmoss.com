@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: "Explore the Collection",
   description:
     "Filter hand-built furniture by timber, finish, upholstery, room and size. Every piece made to order.",
+  alternates: { canonical: "/explore" },
+  openGraph: { title: "Explore the Collection", type: "website" },
 };
 
 export default async function ExplorePage() {

@@ -1,0 +1,53 @@
+import type { MetadataRoute } from "next";
+import { getBrands, getCategories, getProducts } from "@/lib/api";
+
+const BASE = "https://ashandmoss.com";
+
+const staticRoutes: MetadataRoute.Sitemap = [
+  { url: `${BASE}/`, changeFrequency: "weekly", priority: 1 },
+  { url: `${BASE}/explore`, changeFrequency: "weekly", priority: 0.9 },
+  { url: `${BASE}/craft`, changeFrequency: "monthly", priority: 0.5 },
+  { url: `${BASE}/contact`, changeFrequency: "monthly", priority: 0.5 },
+];
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [products, categories, brands] = await Promise.all([
+    getProducts({ limit: 200 }).catch(() => []),
+    getCategories().catch(() => []),
+    getBrands().catch(() => []),
+  ]);
+
+  const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
+    url: `${BASE}/product/${p.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  const flatten = (list: typeof categories, out: string[] = []): string[] => {
+    for (const c of list) {
+      out.push(c.slug);
+      flatten(c.children, out);
+    }
+    return out;
+  };
+
+  const categoryRoutes: MetadataRoute.Sitemap = flatten(categories).map((slug) => ({
+    url: `${BASE}/category/${slug}`,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
+  const brandRoutes: MetadataRoute.Sitemap = brands.map((b) => ({
+    url: `${BASE}/brand/${b.slug}`,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...productRoutes,
+    ...categoryRoutes,
+    ...brandRoutes,
+  ];
+}

@@ -8,6 +8,23 @@ export const metadata: Metadata = {
   title: "Custom Furniture Made to Measure",
   description:
     "Hand-built oak, ash and walnut furniture made to your measurements. Seating, tables, storage and beds from a small Oregon workshop.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Custom Furniture Made to Measure",
+    description:
+      "Hand-built oak, ash and walnut furniture made to your measurements.",
+    images: [{ url: "/images/hero.jpg", width: 1920, height: 1200 }],
+    type: "website",
+  },
+};
+
+const organizationLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Ash & Moss",
+  url: "https://ashandmoss.com",
+  description: "Custom furniture, cut to your room.",
+  sameAs: [],
 };
 
 export default async function Home() {
@@ -19,6 +36,10 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+      />
       <main>
         <section className="relative">
           <Image

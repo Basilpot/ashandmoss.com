@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   title: "The Craft",
   description:
     "How Ash & Moss builds furniture: milling our own boards, hand-cut joinery, hardwax oil finishes and a lifetime repair promise.",
+  alternates: { canonical: "/craft" },
+  openGraph: { title: "The Craft", type: "website" },
 };
 
 const steps = [

@@ -24,5 +24,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const brands = await getBrands();
-  return { title: brands.find((b) => b.slug === slug)?.name ?? slug };
+  const name = brands.find((b) => b.slug === slug)?.name ?? slug;
+  return {
+    title: name,
+    description: `Hand-built furniture from ${name} — made to order in solid hardwood.`,
+    alternates: { canonical: `/brand/${slug}` },
+    openGraph: { title: name, type: "website" },
+  };
 }
