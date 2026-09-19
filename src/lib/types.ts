@@ -82,6 +82,14 @@ export type SiteConfig = {
     instagram?: string;
     tiktok?: string;
   };
+  whatsAppNumber?: string;
+  fullAddress?: string;
+  address?: { city?: string; street?: string; district?: string; country?: string; postalCode?: string };
+  socials?: Record<string, string>;
+  notice?: { message?: string; linkLabel?: string; linkUrl?: string; visible?: boolean; dismissible?: boolean };
+  heroes?: { id: string; image: string; title: string; text: string; linkLabel: string; linkUrl: string; visible: boolean }[];
+  benefits?: { id: string; title: string; description: string; icon: string; visible: boolean }[];
+  about?: { eyebrow: string; title: string; body: string; image: string; linkLabel: string; linkUrl: string; visible: boolean };
 };
 
 export type StorefrontStore = {

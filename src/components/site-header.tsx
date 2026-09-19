@@ -14,8 +14,16 @@ export function SiteHeader({
   siteConfig: SiteConfig;
 }) {
   const [openItem, setOpenItem] = useState<MenuItem | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [noticeVisible, setNoticeVisible] = useState(siteConfig.notice?.visible ?? false);
   const { count } = useCart();
+
+  // ponytail: count-based cap keeps the bar from squeezing; measure-based
+  // overflow only worth it if label lengths vary wildly someday.
+  const MAX_VISIBLE = 6;
+  const visibleMenu = menu.slice(0, MAX_VISIBLE);
+  const overflowMenu = menu.slice(MAX_VISIBLE);
 
   const simpleLinks = [
     { label: "The Craft", href: "/craft" },
@@ -26,21 +34,19 @@ export function SiteHeader({
     <>
       <header className="sticky top-0 z-40 bg-background/90 backdrop-blur">
       {/* Layer 1 — ribbon */}
-      <div className="bg-pine-teal text-primary-foreground">
+      {noticeVisible && siteConfig.notice?.message ? <div className="bg-pine-teal text-primary-foreground">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-2 text-[10px] tracking-[0.16em] uppercase sm:text-[11px]">
-          <span className="truncate">Rare objects, made one at a time</span>
-          <span className="hidden shrink-0 sm:block">
-            White-glove delivery on everything over $2,000
-          </span>
+          <span className="truncate">{siteConfig.notice.linkUrl ? <Link href={siteConfig.notice.linkUrl}>{siteConfig.notice.message}{siteConfig.notice.linkLabel ? ` — ${siteConfig.notice.linkLabel}` : ""}</Link> : siteConfig.notice.message}</span>
+          {siteConfig.notice.dismissible ? <button type="button" aria-label="Dismiss notice" onClick={() => setNoticeVisible(false)}><X className="size-4" /></button> : null}
         </div>
-      </div>
+      </div> : null}
 
       {/* Layer 2 — logo, contact, socials */}
       <div className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
           <Link href="/" className="min-w-0 leading-none" onClick={() => setMobileOpen(false)}>
             <span className="block truncate text-lg font-semibold tracking-[0.18em] uppercase sm:text-xl">
-              Ash <span className="text-fern">&amp;</span> Moss
+              {siteConfig.name ?? "Online Store"}
             </span>
             <span className="mt-1 block text-[9px] tracking-[0.3em] text-muted-foreground uppercase sm:text-[10px]">
               {siteConfig.tagline ?? "Curious & Uncommon Objects"}
@@ -84,15 +90,21 @@ export function SiteHeader({
           moving from a button down into the panel never leaves the hover area. */}
       <nav
         className="relative hidden border-b border-border md:block"
-        onMouseLeave={() => setOpenItem(null)}
+        onMouseLeave={() => {
+          setOpenItem(null);
+          setMoreOpen(false);
+        }}
       >
         <div className="mx-auto flex max-w-6xl items-center gap-6 px-5 py-3 text-sm">
-          {menu.map((item) =>
+          {visibleMenu.map((item) =>
             item.children.length > 0 ? (
               <div key={item.id} className="relative">
                 <button
                   type="button"
-                  onMouseEnter={() => setOpenItem(item)}
+                  onMouseEnter={() => {
+                    setMoreOpen(false);
+                    setOpenItem(item);
+                  }}
                   onClick={() => setOpenItem(openItem?.id === item.id ? null : item)}
                   aria-expanded={openItem?.id === item.id}
                   className={`inline-flex items-center gap-1 transition-colors ${
@@ -129,6 +141,42 @@ export function SiteHeader({
               {l.label}
             </Link>
           ))}
+          {overflowMenu.length > 0 && (
+            <div className="relative">
+              <button
+                type="button"
+                onMouseEnter={() => {
+                  setOpenItem(null);
+                  setMoreOpen(true);
+                }}
+                onClick={() => setMoreOpen((v) => !v)}
+                aria-expanded={moreOpen}
+                aria-label="More categories"
+                className={`inline-flex items-center gap-1 transition-colors ${
+                  moreOpen ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                More
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${moreOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {moreOpen && (
+                <div className="absolute top-full left-0 z-50 mt-2 w-56 border border-border bg-background py-2 shadow-lg">
+                  {overflowMenu.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={item.url}
+                      onClick={() => setMoreOpen(false)}
+                      className="block px-5 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {openItem && openItem.children.length > 0 && (
