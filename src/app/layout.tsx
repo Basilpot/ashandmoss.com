@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Livvic } from "next/font/google";
 import "./globals.css";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { CartProvider } from "@/lib/cart";
-import { getFooter, getMenu, getSiteConfig } from "@/lib/api";
+import { getFooter, getMenu, getStorefrontContext } from "@/lib/api";
 import type { MenuItem, SiteConfig } from "@/lib/types";
+import { getStoreHost } from "@/lib/store-host";
+import { getTemplate } from "@/templates";
 
 const livvic = Livvic({
   subsets: ["latin"],
@@ -14,22 +14,19 @@ const livvic = Livvic({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://ashandmoss.com"),
-  title: {
-    default: "Ash & Moss — Custom Furniture Made to Measure",
-    template: "%s — Ash & Moss",
-  },
-  description:
-    "Hand-built oak, ash and walnut furniture made to your measurements. Seating, tables, storage and beds from a small Oregon workshop.",
-  robots: { index: true, follow: true },
-  openGraph: {
-    siteName: "Ash & Moss",
-    type: "website",
-    locale: "en_US",
-  },
-  twitter: { card: "summary_large_image" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const storeHost = await getStoreHost();
+  const { siteConfig } = await getStorefrontContext(storeHost);
+  const name = siteConfig.name ?? "Online Store";
+  return {
+    metadataBase: new URL(`https://${storeHost}`),
+    title: { default: name, template: `%s — ${name}` },
+    description: siteConfig.description ?? siteConfig.tagline,
+    robots: { index: true, follow: true },
+    openGraph: { siteName: name, type: "website" },
+    twitter: { card: "summary_large_image" },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -39,23 +36,30 @@ export default async function RootLayout({
   let menu: MenuItem[] = [];
   let footer: MenuItem[] = [];
   let siteConfig: SiteConfig = {};
+  let templateKey = "furniture";
+  const storeHost = await getStoreHost();
   try {
-    [menu, footer, siteConfig] = await Promise.all([
-      getMenu(),
-      getFooter(),
-      getSiteConfig(),
+    const [nextMenu, nextFooter, context] = await Promise.all([
+      getMenu(storeHost),
+      getFooter(storeHost),
+      getStorefrontContext(storeHost),
     ]);
+    menu = nextMenu;
+    footer = nextFooter;
+    siteConfig = context.siteConfig;
+    templateKey = context.store.templateKey;
   } catch {
     // backend offline → bare nav/footer
   }
 
+  const Template = getTemplate(templateKey);
   return (
     <html lang="en">
       <body className={`${livvic.variable} font-sans min-h-screen`}>
         <CartProvider>
-          <SiteHeader menu={menu} siteConfig={siteConfig} />
+          <Template.Header menu={menu} siteConfig={siteConfig} />
           {children}
-          <SiteFooter footer={footer} />
+          <Template.Footer footer={footer} />
         </CartProvider>
       </body>
     </html>

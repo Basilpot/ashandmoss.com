@@ -1,0 +1,17 @@
+{
+  // Ash & Moss storefront — Next.js via OpenNext on Workers
+  "name": "ashandmoss-store",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-08-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "routes": [
+    { "pattern": "ashandmoss.com", "custom_domain": true },
+    { "pattern": "www.ashandmoss.com", "custom_domain": true },
+    { "pattern": "*.ashandmoss.com/*", "zone_name": "ashandmoss.com" }
+  ],
+  "observability": { "enabled": true }
+}

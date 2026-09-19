@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getCategories, getProducts } from "@/lib/api";
 import { Listing } from "@/components/listing";
 import type { Category } from "@/lib/types";
+import { getStoreHost } from "@/lib/store-host";
 
 export default async function CategoryPage({
   params,
@@ -9,9 +10,10 @@ export default async function CategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const storeHost = await getStoreHost();
   const [products, categories] = await Promise.all([
-    getProducts({ category: slug, limit: 200 }),
-    getCategories(),
+    getProducts({ category: slug, limit: 200 }, storeHost),
+    getCategories(storeHost),
   ]);
   const name = findName(categories, slug) ?? products[0]?.category.name ?? "Collection";
 
@@ -24,7 +26,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const categories = await getCategories();
+  const categories = await getCategories(await getStoreHost());
   const name = findName(categories, slug) ?? slug;
   return { title: name };
 }

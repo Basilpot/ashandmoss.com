@@ -1,24 +1,24 @@
 import type { MetadataRoute } from "next";
 import { getBrands, getCategories, getProducts } from "@/lib/api";
-
-const BASE = "https://ashandmoss.com";
-
-const staticRoutes: MetadataRoute.Sitemap = [
-  { url: `${BASE}/`, changeFrequency: "weekly", priority: 1 },
-  { url: `${BASE}/explore`, changeFrequency: "weekly", priority: 0.9 },
-  { url: `${BASE}/craft`, changeFrequency: "monthly", priority: 0.5 },
-  { url: `${BASE}/contact`, changeFrequency: "monthly", priority: 0.5 },
-];
+import { getStoreHost } from "@/lib/store-host";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const storeHost = await getStoreHost();
+  const base = `https://${storeHost}`;
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/explore`, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${base}/craft`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/contact`, changeFrequency: "monthly", priority: 0.5 },
+  ];
   const [products, categories, brands] = await Promise.all([
-    getProducts({ limit: 200 }).catch(() => []),
-    getCategories().catch(() => []),
-    getBrands().catch(() => []),
+    getProducts({ limit: 200 }, storeHost).catch(() => []),
+    getCategories(storeHost).catch(() => []),
+    getBrands(storeHost).catch(() => []),
   ]);
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
-    url: `${BASE}/product/${p.slug}`,
+    url: `${base}/product/${p.slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly",
     priority: 0.8,
@@ -33,13 +33,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   };
 
   const categoryRoutes: MetadataRoute.Sitemap = flatten(categories).map((slug) => ({
-    url: `${BASE}/category/${slug}`,
+    url: `${base}/category/${slug}`,
     changeFrequency: "weekly",
     priority: 0.7,
   }));
 
   const brandRoutes: MetadataRoute.Sitemap = brands.map((b) => ({
-    url: `${BASE}/brand/${b.slug}`,
+    url: `${base}/brand/${b.slug}`,
     changeFrequency: "weekly",
     priority: 0.6,
   }));

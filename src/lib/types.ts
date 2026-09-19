@@ -84,6 +84,13 @@ export type SiteConfig = {
   };
 };
 
+export type StorefrontStore = {
+  id: string;
+  name: string;
+  slug: string;
+  templateKey: string;
+};
+
 export type MenuItem = {
   id: string;
   label: string;

@@ -8,6 +8,7 @@ import type {
   PaymentForm,
   Product,
   SiteConfig,
+  StorefrontStore,
 } from "./types";
 
 const API = "/api/v1";
@@ -16,6 +17,12 @@ function apiUrl(path: string): string {
   if (typeof window !== "undefined") return `${API}${path}`;
   const base = process.env.API_BASE_URL ?? "http://localhost:3000/api/v1";
   return `${base}${path}`;
+}
+
+async function tenantFetch(path: string, init?: RequestInit, storeHost?: string) {
+  const headers = new Headers(init?.headers);
+  if (storeHost) headers.set("X-Store-Host", storeHost);
+  return fetch(apiUrl(path), { ...init, headers });
 }
 
 export class ApiError extends Error {
@@ -52,7 +59,7 @@ export type ProductQuery = {
   attribute?: string[];
 };
 
-export async function getProducts(query: ProductQuery = {}): Promise<Product[]> {
+export async function getProducts(query: ProductQuery = {}, storeHost?: string): Promise<Product[]> {
   const params = new URLSearchParams();
   for (const [k, v] of Object.entries(query)) {
     if (v === undefined || v === null || v === "") continue;
@@ -61,58 +68,62 @@ export async function getProducts(query: ProductQuery = {}): Promise<Product[]> 
   }
   params.set("status", "published");
   const { products } = await j<{ products: Product[] }>(
-    await fetch(`${apiUrl("/products")}?${params.toString()}`),
+    await tenantFetch(`/products?${params.toString()}`, undefined, storeHost),
   );
   return products;
 }
 
-export async function getProduct(slug: string): Promise<Product> {
+export async function getProduct(slug: string, storeHost?: string): Promise<Product> {
   const { data } = await j<{ data: Product }>(
-    await fetch(`${apiUrl("/products")}/${slug}`),
+    await tenantFetch(`/products/${slug}`, undefined, storeHost),
   );
   return data;
 }
 
-export async function getCategories(): Promise<Category[]> {
+export async function getCategories(storeHost?: string): Promise<Category[]> {
   const { categories } = await j<{ categories: Category[] }>(
-    await fetch(apiUrl("/categories")),
+    await tenantFetch("/categories", undefined, storeHost),
   );
   return categories;
 }
 
-export async function getBrands(): Promise<Brand[]> {
+export async function getBrands(storeHost?: string): Promise<Brand[]> {
   const { brands } = await j<{ brands: Brand[] }>(
-    await fetch(apiUrl("/brands")),
+    await tenantFetch("/brands", undefined, storeHost),
   );
   return brands;
 }
 
-export async function getMenu(): Promise<MenuItem[]> {
+export async function getMenu(storeHost?: string): Promise<MenuItem[]> {
   const { data } = await j<{
     data: { items?: MenuItem[]; autoItems?: MenuItem[]; auto?: boolean };
-  }>(await fetch(apiUrl("/menus"), { cache: "no-store" }));
+  }>(await tenantFetch("/menus", { cache: "no-store" }, storeHost));
   return data.autoItems ?? data.items ?? [];
 }
 
-export async function getFooter(): Promise<MenuItem[]> {
+export async function getFooter(storeHost?: string): Promise<MenuItem[]> {
   const { data } = await j<{
     data: { items?: MenuItem[]; autoItems?: MenuItem[]; auto?: boolean };
-  }>(await fetch(apiUrl("/footers"), { cache: "no-store" }));
+  }>(await tenantFetch("/footers", { cache: "no-store" }, storeHost));
   return data.autoItems ?? data.items ?? [];
 }
 
-export async function getInfoPage(slug: string): Promise<InfoPage> {
+export async function getInfoPage(slug: string, storeHost?: string): Promise<InfoPage> {
   const { infoPage } = await j<{ infoPage: InfoPage }>(
-    await fetch(`${apiUrl("/info-page/slug")}/${slug}`, { cache: "no-store" }),
+    await tenantFetch(`/info-page/slug/${slug}`, { cache: "no-store" }, storeHost),
   );
   return infoPage;
 }
 
-export async function getSiteConfig(): Promise<SiteConfig> {
-  const { data } = await j<{ data: SiteConfig }>(
-    await fetch(apiUrl("/site-config")),
+export async function getSiteConfig(storeHost?: string): Promise<SiteConfig> {
+  return (await getStorefrontContext(storeHost)).siteConfig;
+}
+
+export async function getStorefrontContext(storeHost?: string): Promise<{ siteConfig: SiteConfig; store: StorefrontStore }> {
+  const response = await j<{ data: SiteConfig; store: StorefrontStore }>(
+    await tenantFetch("/site-config", undefined, storeHost),
   );
-  return data ?? {};
+  return { siteConfig: response.data ?? {}, store: response.store };
 }
 
 export function productImage(p: Product): string {
@@ -132,7 +143,7 @@ export async function createOrder(
   const { data } = await j<{
     data: { order: Order; paymentForm: PaymentForm };
   }>(
-    await fetch(apiUrl("/orders"), {
+    await tenantFetch("/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
@@ -143,7 +154,7 @@ export async function createOrder(
 
 export async function getOrderByNumber(orderNumber: string): Promise<Order> {
   const { data } = await j<{ data: { order: Order } }>(
-    await fetch(`${apiUrl("/orders/by-number")}/${encodeURIComponent(orderNumber)}`, {
+    await tenantFetch(`/orders/by-number/${encodeURIComponent(orderNumber)}`, {
       cache: "no-store",
     }),
   );
