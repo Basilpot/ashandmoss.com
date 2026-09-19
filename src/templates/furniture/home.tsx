@@ -56,7 +56,7 @@ export async function FurnitureHome({ storeHost, siteConfig }: { storeHost: stri
           </div>
         </section> : null}
 
-        {(siteConfig.benefits ?? []).some((benefit) => benefit.visible) ? <section className="mx-auto grid max-w-6xl gap-6 px-5 py-12 sm:grid-cols-2 lg:grid-cols-4">{siteConfig.benefits?.filter((benefit) => benefit.visible).map((benefit) => <div key={benefit.id} className="border border-border p-5"><h2 className="font-semibold">{benefit.title}</h2><p className="mt-2 text-sm text-muted-foreground">{benefit.description}</p></div>)}</section> : null}
+        {(siteConfig.benefits ?? []).some((benefit) => benefit.visible) ? <section className="mx-auto max-w-6xl px-5 py-12">{siteConfig.benefitsTitle ? <div className="mb-8 flex flex-wrap items-end justify-between gap-4"><div><h2 className="text-3xl font-semibold">{siteConfig.benefitsTitle}</h2></div></div> : null}<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{siteConfig.benefits?.filter((benefit) => benefit.visible).map((benefit) => <div key={benefit.id} className="border border-border p-5"><h3 className="font-semibold">{benefit.title}</h3><p className="mt-2 text-sm text-muted-foreground">{benefit.description}</p></div>)}</div></section> : null}
 
         <section className="mx-auto max-w-6xl px-5 py-20">
           <h2 className="text-3xl font-semibold">Browse by category</h2>
