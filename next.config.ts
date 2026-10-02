@@ -8,15 +8,12 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "picsum.photos", pathname: "/**" },
-      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
-      { protocol: "https", hostname: "source.unsplash.com", pathname: "/**" },
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3000",
-        pathname: "/api/**",
-      },
+      // Must match the API worker host. The old api.ashandmoss.com entry is
+      // gone: the API moved to eapi.basilpot.com, and that hostname now falls
+      // through to our own *.ashandmoss.com/* wildcard route, so it would serve
+      // this storefront instead of any image.
+      { protocol: "https", hostname: "eapi.basilpot.com", pathname: "/**" },
+      { protocol: "http", hostname: "localhost", port: "3000", pathname: "/**" },
     ],
   },
 };

@@ -21,7 +21,13 @@ function apiUrl(path: string): string {
 
 async function tenantFetch(path: string, init?: RequestInit, storeHost?: string) {
   const headers = new Headers(init?.headers);
-  if (storeHost) headers.set("X-Store-Host", storeHost);
+  // Client-side calls have no request headers to read on the server, but the
+  // browser's own host is the tenant host — the same value getStoreHost()
+  // returns during SSR. Without this, checkout and any other client-side write
+  // arrives with no tenant hint and the API falls back to the default store.
+  const host =
+    storeHost ?? (typeof window !== "undefined" ? window.location.host : undefined);
+  if (host) headers.set("X-Store-Host", host);
   return fetch(apiUrl(path), { ...init, headers });
 }
 
