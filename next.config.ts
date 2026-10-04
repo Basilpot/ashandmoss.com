@@ -8,11 +8,13 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
-      // Must match the API worker host. The old api.ashandmoss.com entry is
-      // gone: the API moved to eapi.basilpot.com, and that hostname now falls
-      // through to our own *.ashandmoss.com/* wildcard route, so it would serve
-      // this storefront instead of any image.
-      { protocol: "https", hostname: "eapi.basilpot.com", pathname: "/**" },
+      // Must match the API worker host, or next/image refuses to optimise it.
+      // Followed the API through two moves: api.ashandmoss.com -> eapi.basilpot.com
+      // -> ecommerce.basilpot.com when the catalogue API was split out of the
+      // shared worker. Both old hostnames now fall through to our own
+      // *.ashandmoss.com/* wildcard route and would serve this storefront
+      // instead of an image.
+      { protocol: "https", hostname: "ecommerce.basilpot.com", pathname: "/**" },
       { protocol: "http", hostname: "localhost", port: "3000", pathname: "/**" },
     ],
   },
