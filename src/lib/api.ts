@@ -10,12 +10,13 @@ import type {
   SiteConfig,
   StorefrontStore,
 } from "./types";
+import { requireApiBaseUrl } from "./env";
 
 const API = "/api/v1";
 
 function apiUrl(path: string): string {
   if (typeof window !== "undefined") return `${API}${path}`;
-  const base = process.env.API_BASE_URL ?? "http://localhost:3000/api/v1";
+  const base = requireApiBaseUrl();
   return `${base}${path}`;
 }
 

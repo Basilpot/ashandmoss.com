@@ -41,3 +41,8 @@ tsconfig.tsbuildinfo
 *.njsproj
 *.sln
 *.sw?
+
+# .env.production holds this project's deployed hostnames. It is not committed:
+# an env file is exactly where someone eventually puts a real secret, and
+# tracking it is what makes that mistake easy. Keys live in .env.example.
+.env.production
