@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getInfoPage } from "@/lib/api";
-import { getStoreHost } from "@/lib/store-host";
+import { getSiteOrigin } from "@/lib/site-origin";
 
 export default async function InfoPage({
   params,
@@ -9,7 +9,7 @@ export default async function InfoPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = await getInfoPage(slug, await getStoreHost()).catch(() => null);
+  const page = await getInfoPage(slug).catch(() => null);
   if (!page || !page.published) notFound();
 
   return (
@@ -30,7 +30,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const page = await getInfoPage(slug, await getStoreHost()).catch(() => null);
+  const page = await getInfoPage(slug).catch(() => null);
   if (!page) return { title: "Page not found" };
   return {
     title: page.metaTitle ?? page.title,

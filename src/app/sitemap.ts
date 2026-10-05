@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 import { getBrands, getCategories, getProducts } from "@/lib/api";
-import { getStoreHost } from "@/lib/store-host";
+import { getSiteOrigin } from "@/lib/site-origin";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const storeHost = await getStoreHost();
-  const base = `https://${storeHost}`;
+  const siteOrigin = await getSiteOrigin();
+  const base = siteOrigin;
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${base}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/explore`, changeFrequency: "weekly", priority: 0.9 },
@@ -12,9 +12,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/contact`, changeFrequency: "monthly", priority: 0.5 },
   ];
   const [products, categories, brands] = await Promise.all([
-    getProducts({ limit: 200 }, storeHost).catch(() => []),
-    getCategories(storeHost).catch(() => []),
-    getBrands(storeHost).catch(() => []),
+    getProducts({ limit: 200 }).catch(() => []),
+    getCategories().catch(() => []),
+    getBrands().catch(() => []),
   ]);
 
   const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({

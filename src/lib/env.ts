@@ -28,3 +28,23 @@ export function requireApiBaseUrl(): string {
   }
   return value.replace(/\/$/, "");
 }
+/**
+ * The API key this storefront authenticates with.
+ *
+ * Server-side only, and required. It names the tenant, so a wrong or revoked key
+ * is a hard 401 from the API rather than a silent fall-back to some other store's
+ * catalogue — which is the failure mode a storefront must never have.
+ */
+export function requireApiKey(): string {
+  const value = process.env.STOREFRONT_API_KEY;
+  if (!value || !value.trim()) {
+    throw new Error(
+      "[config] STOREFRONT_API_KEY is not set. Copy .env.example to .env.local " +
+        "(dev) or .env.production (deploy) and fill it in. Mint one from the " +
+        "dashboard under Settings -> API keys. Refusing to send an unauthenticated " +
+        "request, because the API would resolve a default tenant and serve the " +
+        "wrong shop.",
+    );
+  }
+  return value.trim();
+}

@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { getStorefrontContext } from "@/lib/api";
-import { getStoreHost } from "@/lib/store-host";
+import { getSiteOrigin } from "@/lib/site-origin";
 import { getTemplate } from "@/templates";
 
 export default async function Home() {
-  const storeHost = await getStoreHost();
-  const { siteConfig, store } = await getStorefrontContext(storeHost);
+  const siteOrigin = await getSiteOrigin();
+  const { siteConfig, store } = await getStorefrontContext();
   const Template = getTemplate(store.templateKey);
-  return <Template.Home storeHost={storeHost} siteConfig={siteConfig} />;
+  return <Template.Home siteOrigin={siteOrigin} siteConfig={siteConfig} />;
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const storeHost = await getStoreHost();
-  const { siteConfig, store } = await getStorefrontContext(storeHost);
+  const siteOrigin = await getSiteOrigin();
+  const { siteConfig, store } = await getStorefrontContext();
   return getTemplate(store.templateKey).metadata(siteConfig);
 }

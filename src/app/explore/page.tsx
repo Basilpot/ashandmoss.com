@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getProducts } from "@/lib/api";
 import { ExploreClient } from "@/components/explore-client";
-import { getStoreHost } from "@/lib/store-host";
+import { getSiteOrigin } from "@/lib/site-origin";
 
 export const metadata: Metadata = {
   title: "Explore the Collection",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function ExplorePage() {
   // ponytail: fetch all published pieces once and filter client-side;
   // server-side pagination only when the catalog outgrows 200
-  const products = await getProducts({ limit: 200 }, await getStoreHost());
+  const products = await getProducts({ limit: 200 });
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-14">

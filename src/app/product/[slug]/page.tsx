@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/product-card";
 import { ProductGallery } from "@/components/product-gallery";
 import { AddToCart } from "@/components/add-to-cart";
 import type { Product } from "@/lib/types";
-import { getStoreHost } from "@/lib/store-host";
+import { getSiteOrigin } from "@/lib/site-origin";
 
 export default async function ProductPage({
   params,
@@ -15,14 +15,14 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const storeHost = await getStoreHost();
-  const product = await getProduct(slug, storeHost).catch(() => null);
+  const siteOrigin = await getSiteOrigin();
+  const product = await getProduct(slug).catch(() => null);
   if (!product) notFound();
 
   const related = await getProducts({
     category: product.category.slug,
     limit: 4,
-  }, storeHost).then((list) => list.filter((p) => p.slug !== slug).slice(0, 3));
+  }).then((list) => list.filter((p) => p.slug !== slug).slice(0, 3));
 
   const variants = product.variants ?? [];
   const lowest = variants.length
@@ -39,7 +39,7 @@ export default async function ProductPage({
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd(product, storeHost)) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd(product, siteOrigin)) }}
       />
 
       <div className="mt-8 grid gap-14 md:grid-cols-2">
@@ -125,7 +125,7 @@ export default async function ProductPage({
   );
 }
 
-function productLd(product: Product, storeHost: string) {
+function productLd(product: Product, siteOrigin: string) {
   const variants = product.variants ?? [];
   const lowest = variants.length
     ? Math.min(...variants.map((v) => Number(v.price)))
@@ -146,7 +146,7 @@ function productLd(product: Product, storeHost: string) {
       price: lowest,
       priceCurrency: currency,
       availability: "https://schema.org/InStock",
-      url: `https://${storeHost}/product/${product.slug}`,
+      url: `${siteOrigin}/product/${product.slug}`,
     },
   };
 }
@@ -157,7 +157,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getProduct(slug, await getStoreHost()).catch(() => null);
+  const product = await getProduct(slug).catch(() => null);
   if (!product) return { title: "Piece not found", robots: { index: false } };
   const image = productImage(product) || undefined;
   return {

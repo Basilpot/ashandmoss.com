@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getBrands, getProducts } from "@/lib/api";
 import { Listing } from "@/components/listing";
-import { getStoreHost } from "@/lib/store-host";
+import { getSiteOrigin } from "@/lib/site-origin";
 
 export default async function BrandPage({
   params,
@@ -9,10 +9,10 @@ export default async function BrandPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const storeHost = await getStoreHost();
+  const siteOrigin = await getSiteOrigin();
   const [products, brands] = await Promise.all([
-    getProducts({ brand: slug, limit: 200 }, storeHost),
-    getBrands(storeHost),
+    getProducts({ brand: slug, limit: 200 }),
+    getBrands(),
   ]);
   const name = brands.find((b) => b.slug === slug)?.name ?? products[0]?.brand.name ?? "Brand";
 
@@ -25,7 +25,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const brands = await getBrands(await getStoreHost());
+  const brands = await getBrands();
   const name = brands.find((b) => b.slug === slug)?.name ?? slug;
   return {
     title: name,

@@ -5,10 +5,10 @@ import type { SiteConfig } from "@/lib/types";
 import { ProductCard } from "@/components/product-card";
 import { HeroCarousel } from "@/components/hero-carousel";
 
-export async function FurnitureHome({ storeHost, siteConfig }: { storeHost: string; siteConfig: SiteConfig }) {
+export async function FurnitureHome({ siteOrigin, siteConfig }: { siteOrigin: string; siteConfig: SiteConfig }) {
   const [featured, categories] = await Promise.all([
-    getProducts({ isFeatured: "true", limit: 8 }, storeHost),
-    getCategories(storeHost),
+    getProducts({ isFeatured: "true", limit: 8 }),
+    getCategories(),
   ]);
   const roots = categories.filter((category) => !category.parentId);
   const name = siteConfig.name ?? "Ash & Moss";
@@ -17,7 +17,7 @@ export async function FurnitureHome({ storeHost, siteConfig }: { storeHost: stri
     "@context": "https://schema.org",
     "@type": "Organization",
     name,
-    url: `https://${storeHost}`,
+    url: siteOrigin,
     description: siteConfig.description ?? siteConfig.tagline,
     sameAs: Object.values(siteConfig.social ?? {}).filter(Boolean),
   };

@@ -10,25 +10,38 @@ import type {
   SiteConfig,
   StorefrontStore,
 } from "./types";
-import { requireApiBaseUrl } from "./env";
+import { requireApiBaseUrl, requireApiKey } from "./env";
 
 const API = "/api/v1";
 
+/**
+ * Two paths to the API, and both of them attach the key.
+ *
+ * Browser  -> same-origin /api/v1/*, handled by src/app/api/v1/[...path]/route.ts,
+ *             which adds the bearer key server-side. A key cannot live in client
+ *             code, so this is the only way a browser can reach the API.
+ *
+ * Server   -> straight to the API host, with the key attached here.
+ *
+ * The split exists because a server render has no origin to make a same-origin
+ * request against, and it cannot route through the proxy without importing
+ * next/headers — which is server-only, and this module is also imported by client
+ * components.
+ *
+ * There is no tenant header and no siteOrigin argument. The key names the store.
+ * That is also why this storefront works from any hostname, including a custom
+ * domain with no store_domain row registered against it.
+ */
 function apiUrl(path: string): string {
   if (typeof window !== "undefined") return `${API}${path}`;
-  const base = requireApiBaseUrl();
-  return `${base}${path}`;
+  return `${requireApiBaseUrl()}${path}`;
 }
 
-async function tenantFetch(path: string, init?: RequestInit, storeHost?: string) {
+async function tenantFetch(path: string, init?: RequestInit) {
+  if (typeof window !== "undefined") return fetch(apiUrl(path), init);
+
   const headers = new Headers(init?.headers);
-  // Client-side calls have no request headers to read on the server, but the
-  // browser's own host is the tenant host — the same value getStoreHost()
-  // returns during SSR. Without this, checkout and any other client-side write
-  // arrives with no tenant hint and the API falls back to the default store.
-  const host =
-    storeHost ?? (typeof window !== "undefined" ? window.location.host : undefined);
-  if (host) headers.set("X-Store-Host", host);
+  headers.set("Authorization", `Bearer ${requireApiKey()}`);
   return fetch(apiUrl(path), { ...init, headers });
 }
 
@@ -66,7 +79,7 @@ export type ProductQuery = {
   attribute?: string[];
 };
 
-export async function getProducts(query: ProductQuery = {}, storeHost?: string): Promise<Product[]> {
+export async function getProducts(query: ProductQuery = {}): Promise<Product[]> {
   const params = new URLSearchParams();
   for (const [k, v] of Object.entries(query)) {
     if (v === undefined || v === null || v === "") continue;
@@ -75,60 +88,60 @@ export async function getProducts(query: ProductQuery = {}, storeHost?: string):
   }
   params.set("status", "published");
   const { products } = await j<{ products: Product[] }>(
-    await tenantFetch(`/products?${params.toString()}`, undefined, storeHost),
+    await tenantFetch(`/products?${params.toString()}`, undefined),
   );
   return products;
 }
 
-export async function getProduct(slug: string, storeHost?: string): Promise<Product> {
+export async function getProduct(slug: string): Promise<Product> {
   const { data } = await j<{ data: Product }>(
-    await tenantFetch(`/products/${slug}`, undefined, storeHost),
+    await tenantFetch(`/products/${slug}`, undefined),
   );
   return data;
 }
 
-export async function getCategories(storeHost?: string): Promise<Category[]> {
+export async function getCategories(): Promise<Category[]> {
   const { categories } = await j<{ categories: Category[] }>(
-    await tenantFetch("/categories", undefined, storeHost),
+    await tenantFetch("/categories", undefined),
   );
   return categories;
 }
 
-export async function getBrands(storeHost?: string): Promise<Brand[]> {
+export async function getBrands(): Promise<Brand[]> {
   const { brands } = await j<{ brands: Brand[] }>(
-    await tenantFetch("/brands", undefined, storeHost),
+    await tenantFetch("/brands", undefined),
   );
   return brands;
 }
 
-export async function getMenu(storeHost?: string): Promise<MenuItem[]> {
+export async function getMenu(): Promise<MenuItem[]> {
   const { data } = await j<{
     data: { items?: MenuItem[]; autoItems?: MenuItem[]; auto?: boolean };
-  }>(await tenantFetch("/menus", { cache: "no-store" }, storeHost));
+  }>(await tenantFetch("/menus", { cache: "no-store" }));
   return data.autoItems ?? data.items ?? [];
 }
 
-export async function getFooter(storeHost?: string): Promise<MenuItem[]> {
+export async function getFooter(): Promise<MenuItem[]> {
   const { data } = await j<{
     data: { items?: MenuItem[]; autoItems?: MenuItem[]; auto?: boolean };
-  }>(await tenantFetch("/footers", { cache: "no-store" }, storeHost));
+  }>(await tenantFetch("/footers", { cache: "no-store" }));
   return data.autoItems ?? data.items ?? [];
 }
 
-export async function getInfoPage(slug: string, storeHost?: string): Promise<InfoPage> {
+export async function getInfoPage(slug: string): Promise<InfoPage> {
   const { infoPage } = await j<{ infoPage: InfoPage }>(
-    await tenantFetch(`/info-page/slug/${slug}`, { cache: "no-store" }, storeHost),
+    await tenantFetch(`/info-page/slug/${slug}`, { cache: "no-store" }),
   );
   return infoPage;
 }
 
-export async function getSiteConfig(storeHost?: string): Promise<SiteConfig> {
-  return (await getStorefrontContext(storeHost)).siteConfig;
+export async function getSiteConfig(): Promise<SiteConfig> {
+  return (await getStorefrontContext()).siteConfig;
 }
 
-export async function getStorefrontContext(storeHost?: string): Promise<{ siteConfig: SiteConfig; store: StorefrontStore }> {
+export async function getStorefrontContext(): Promise<{ siteConfig: SiteConfig; store: StorefrontStore }> {
   const response = await j<{ data: SiteConfig; store: StorefrontStore }>(
-    await tenantFetch("/site-config", undefined, storeHost),
+    await tenantFetch("/site-config", undefined),
   );
   return { siteConfig: response.data ?? {}, store: response.store };
 }

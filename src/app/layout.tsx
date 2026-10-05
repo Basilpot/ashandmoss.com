@@ -4,7 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/lib/cart";
 import { getFooter, getMenu, getStorefrontContext } from "@/lib/api";
 import type { MenuItem, SiteConfig } from "@/lib/types";
-import { getStoreHost } from "@/lib/store-host";
+import { getSiteOrigin } from "@/lib/site-origin";
 import { getTemplate } from "@/templates";
 
 const livvic = Livvic({
@@ -15,11 +15,11 @@ const livvic = Livvic({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const storeHost = await getStoreHost();
-  const { siteConfig } = await getStorefrontContext(storeHost);
+  const siteOrigin = await getSiteOrigin();
+  const { siteConfig } = await getStorefrontContext();
   const name = siteConfig.name ?? "Online Store";
   return {
-    metadataBase: new URL(`https://${storeHost}`),
+    metadataBase: new URL(siteOrigin),
     title: { default: name, template: `%s — ${name}` },
     description: siteConfig.description ?? siteConfig.tagline,
     robots: { index: true, follow: true },
@@ -37,12 +37,12 @@ export default async function RootLayout({
   let footer: MenuItem[] = [];
   let siteConfig: SiteConfig = {};
   let templateKey = "furniture";
-  const storeHost = await getStoreHost();
+  const siteOrigin = await getSiteOrigin();
   try {
     const [nextMenu, nextFooter, context] = await Promise.all([
-      getMenu(storeHost),
-      getFooter(storeHost),
-      getStorefrontContext(storeHost),
+      getMenu(),
+      getFooter(),
+      getStorefrontContext(),
     ]);
     menu = nextMenu;
     footer = nextFooter;
