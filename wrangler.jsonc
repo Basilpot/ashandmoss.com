@@ -10,8 +10,7 @@
   },
   "routes": [
     { "pattern": "ashandmoss.com", "custom_domain": true },
-    { "pattern": "www.ashandmoss.com", "custom_domain": true },
-    { "pattern": "*.ashandmoss.com/*", "zone_name": "ashandmoss.com" }
+    { "pattern": "www.ashandmoss.com", "custom_domain": true }
   ],
   "observability": { "enabled": true }
 }
